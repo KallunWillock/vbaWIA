@@ -10,7 +10,7 @@ Attribute VB_Exposed = False
 
                                                                                                                                                                                         ' _
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||                                                                                     ' _
-||||||||||||||||||||||||||             clsWIA (v1.1)             ||||||||||||||||||||||||||||||||||                                                                                     ' _
+||||||||||||||||||||||||||             clsWIA (v1.2)             ||||||||||||||||||||||||||||||||||                                                                                     ' _
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
                                                                                                                                                                                         ' _
 AUTHOR:   Kallun Willock                                                                                                                                                                ' _
@@ -20,9 +20,9 @@ PURPOSE:  A simple class module that leverages the functionality of the WIA COM 
 LICENSE:  MIT                                                                                                                                                                           ' _
 VERSION:  1.0        08/04/2023         Published v1.0 on Mr.Excel forum.                                                                                                               ' _
           1.1        18/05/2023         Added comments for publication Github                                                                                                           ' _
+          1.2        26/05/2023         Added flip routine.                                                                                                                             ' _
 TODO:     [ ] Error Handling                                                                                                                                                            ' _
 
-        
 Option Explicit
 
 Public Enum RotationEnum
@@ -73,6 +73,8 @@ End Property
 
 Public Sub ScaleImage(ByVal NewWidth As Long, ByVal NewHeight As Long, _
                       Optional ByVal MaintainAspect As Boolean = True)
+
+    If TargetImageFile Is Nothing Then Exit Sub
                       
     If NewWidth > 0 And NewHeight > 0 Then
         With CreateObject("WIA.ImageProcess")
@@ -91,11 +93,26 @@ Public Sub RotateImage(Optional ByVal DegreesRotate As RotationEnum)
     ' 0 degrees corresponds to the default orientation of the image (as loaded), and each
     ' sebsequent 90 degree rotation transforms clock-wise.
 
+    If TargetImageFile Is Nothing Then Exit Sub
+    
     With CreateObject("WIA.ImageProcess")
         .Filters.Add .FilterInfos("RotateFlip").FilterID
         .Filters(1).Properties("RotationAngle") = DegreesRotate
         Set TargetImageFile = .Apply(TargetImageFile)
     End With
+
+End Sub
+
+Public Sub FlipImage(ByVal Horizontal As Boolean, Optional ByVal Vertical As Boolean = False)
+
+    If TargetImageFile Is Nothing Then Exit Sub
+
+    With CreateObject("WIA.ImageProcess")
+        .Filters.Add .FilterInfos("RotateFlip").FilterID
+        .Filters(1).Properties("FlipHorizontal") = Horizontal
+        .Filters(1).Properties("FlipVertical") = Vertical
+    End With
+
 End Sub
 
 Public Sub SaveImage(Optional ByVal ImageFileType As ImageFormatEnum)
