@@ -1,31 +1,33 @@
-
-  																					                                                                                            ' _
+                                                                                                                                                                                ' _
    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||                                                                          ' _
    ||||||||||||||||||||||||||                                       ||||||||||||||||||||||||||||||||||                                                                          ' _
-   ||||||||||||||||||||||||||      EXIF PROPERTIES  (WIA) V1.1      ||||||||||||||||||||||||||||||||||                                                                          ' _
+   ||||||||||||||||||||||||||      EXIF PROPERTIES  (WIA) V1.3      ||||||||||||||||||||||||||||||||||                                                                          ' _
    ||||||||||||||||||||||||||                                       ||||||||||||||||||||||||||||||||||                                                                          ' _
    |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||                                                                          ' _
-															         					                                                                                        ' _
-   AUTHOR:   Dan_W and Kallun Willock                                                                     							                                            ' _
+                                                                                                                                                                                ' _
+   AUTHOR:   Dan_W and Kallun Willock                                                                                                                                           ' _
    PURPOSE:  Routines to read and write EXIF properties to JPG image files using                                                                                                ' _
-             the Windows Image Acquisition (WIA) COM Object.									 					                                                            ' _
+             the Windows Image Acquisition (WIA) COM Object.                                                                                                                    ' _
+                                                                                                                                                                                ' _
    LICENSE:  MIT
-																 	         	         	                                                                                    ' _
-   VERSION:  1.1   09/04/2022      Added 400+ additional EXIF MetaData Property Tags; New subroutine                                                                            ' _
-                                   to load table of EXIF MetaData Properites (EXIFTOOL.ORG) for easy reference                   	         	         	                    ' _
-             1.0   25/03/2022      Completed code for OP -  									 	         	         	                                                    ' _
+                                                                                                                                                                                ' _
+   VERSION:  1.2   25/10/2022      Added functionality to remove EXIF MetaData Properties                                                                                       ' _
+                                                                                                                                                                                ' _
+             1.1   09/04/2022      Added 400+ additional EXIF MetaData Property Tags; New subroutine                                                                            ' _
+                                   to load table of EXIF MetaData Properites (EXIFTOOL.ORG) for easy reference                                                                  ' _
+             1.0   25/03/2022      Completed code for OP -                                                                                                                      ' _
                                    https://www.mrexcel.com/board/threads/using-a-userform-to-change-the-document-properties-or-tags.1198206/
-																                                                                                                                ' _
-   USAGE:             									                                                                                                                        ' _
-             WriteEXIFData Filename, PropertyName, PropertyValue, (Opt) WriteOverOriginal = True, (Opt) CreateBackup             					                            ' _
+                                                                                                                                                                                ' _
+   USAGE:                                                                                                                                                                       ' _
+             - WriteEXIFData Filename, PropertyName, PropertyValue, (Opt) WriteOverOriginal = True, (Opt) CreateBackup                                                          ' _
              - WriteEXIFData "C:\Temp\IMG01 - Copy.jpg", EXIFImageTitle, "New Image Title"                                                                                      ' _
              - WriteEXIFData "C:\Temp\IMG01 - Copy.jpg", EXIFImageTitle, "Live Life On The Edge", True                                                                          ' _
-															         					                                                                                        ' _
+                                                                                                                                                                                ' _
              - Comments = GetEXIFData("C:\Temp\IMG_20210508_170154.jpg", EXIFImageComments)
                                                          
    Option Explicit
-												                                                                     	                                                        ' _
-       Property Descriptions sourced from                                                                                                                                     	' _
+                                                                                                                                                                                ' _
+       Property Descriptions sourced from                                                                                                                                       ' _
        https://docs.microsoft.com/en-us/windows/win32/gdiplus/-gdiplus-constant-property-item-descriptions
    
    Public Enum PropertyNameEnum
@@ -100,7 +102,7 @@
        PageNumber = 297                                  ' Page number of the page from which the image was scanned.
        TransferFunction = 301                            ' Tables that specify transfer functions for the image.
        SoftwareUsed = 305                                ' Null-terminated character string that specifies the name and version of the software or firmware of the device used to generate the image.
-       DateTime = 306                                    ' Date and time the image was created.
+       dateTime = 306                                    ' Date and time the image was created.
        Artist = 315                                      ' Null-terminated character string that specifies the name of the person who created the image.
        HostComputer = 316                                ' Null-terminated character string that specifies the computer and/or operating system used to create the image.
        Predictor = 317                                   ' Type of prediction scheme that was applied to the image data before the encoding scheme was applied.
@@ -517,10 +519,10 @@
                                                          
        For Each ImageProperty In Image.Properties
            If ImageProperty.PropertyID = PropertyName Then
-               If TypeName(ImageProperty.value) = "String" Then
-                   Result = ImageProperty.value
+               If TypeName(ImageProperty.Value) = "String" Then
+                   Result = ImageProperty.Value
                Else
-                   Result = Replace(StrConv(ImageProperty.value.BinaryData, vbUnicode), Chr(0), "")
+                   Result = Replace(StrConv(ImageProperty.Value.BinaryData, vbUnicode), Chr(0), "")
                End If
                Exit For
            End If
@@ -533,7 +535,7 @@
                                                          
    End Function
                                                          
-   Public Function WriteEXIFData(ByVal filename As String, ByVal PropertyName As PropertyNameEnum, ByVal PropertyValue As Variant, Optional ByVal OverWriteOriginal As Boolean = True, Optional ByVal CreateBackup As Boolean)
+   Public Function WriteEXIFData(ByVal filename As String, ByVal PropertyName As PropertyNameEnum, ByVal PropertyValue As Variant, Optional ByVal OverWriteOriginal As Boolean = True, Optional ByVal CreateBackup As Boolean = False)
                                                          
        Dim Image               As Object
        Dim ImageProcess        As Object
@@ -590,3 +592,48 @@
                                                          
    End Function
                                                          
+   Public Sub DeleteEXIFData(ByVal filename As String, ByVal PropertyName As PropertyNameEnum, Optional ByVal OverWriteOriginal As Boolean = True, Optional ByVal CreateBackup As Boolean = False)
+                                                         
+       Dim Image               As Object
+       Dim ImageProcess        As Object
+       Dim ImageVector         As Object
+       Dim NewFileName         As String
+                                                         
+       If CreateBackup = True Then
+           Dim BackUpFilename  As String
+           BackUpFilename = Replace(filename, ".jpg", "_BACKUP(" & Format(Now, "ddmmyyyy-hhnn") & ").jpg")
+           FileCopy filename, BackUpFilename
+       End If
+                                                         
+       Set Image = CreateObject("WIA.ImageFile")
+       Set ImageProcess = CreateObject("WIA.ImageProcess")
+       Set ImageVector = CreateObject("WIA.Vector")
+                                                         
+       Image.LoadFile filename
+                                                         
+       With ImageProcess
+            .Filters.Add ImageProcess.FilterInfos("Exif").FilterID
+            .Filters(1).Properties("ID") = PropertyName
+            .Filters(1).Properties("Remove") = True
+        End With
+                 
+       Set Image = ImageProcess.Apply(Image)
+                                                         
+       If OverWriteOriginal = True Then
+           NewFileName = filename
+           Kill filename
+       Else
+           NewFileName = Replace(filename, ".jpg", "_metadata.jpg")
+           If Len(Dir(NewFileName)) > 0 Then Kill NewFileName
+       End If
+                                                         
+       Image.SaveFile NewFileName
+                                                         
+       Set Image = Nothing
+       Set ImageProcess = Nothing
+       Set ImageVector = Nothing
+                                                         
+   End Sub
+
+
+
