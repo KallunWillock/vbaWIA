@@ -10,7 +10,12 @@
 'LICENSE:  MIT                                                                                                        
 
 Sub Main()
+    Const wiaFormatBMP = "{B96B3CAB-0728-11D3-9D7B-0000F81EF32E}"
     Const wiaFormatPNG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}"
+    Const wiaFormatGIF = "{B96B3CB0-0728-11D3-9D7B-0000F81EF32E}"
+    Const wiaFormatJPG = "{B96B3CAE-0728-11D3-9D7B-0000F81EF32E}"
+    Const wiaFormatTIF = "{B96B3CB1-0728-11D3-9D7B-0000F81EF32E}"
+    
     Dim Img                 ' As ImageFile
     Dim objArgs             ' Handles the drag/dropped files
     Dim I

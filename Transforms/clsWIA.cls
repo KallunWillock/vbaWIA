@@ -115,6 +115,15 @@ Public Sub FlipImage(ByVal Horizontal As Boolean, Optional ByVal Vertical As Boo
 
 End Sub
 
+Public Function GetPixelColor(ByRef ImgFile As Object, BYval x As Long, Byval y as Long)
+    Dim ImgVector as Object, Location as Long, TargEtColor as Long
+    Set ImgVector = ImgFile.ARGBData
+    Location = x + (y * ImgFile.Width)
+    TargEtColor = ImgVector(Location)
+    GetPixelColor = RGBFromABGR(TargEtColor)
+    Set ImgVector = Nothing
+End Function
+
 Public Sub SaveImage(Optional ByVal ImageFileType As ImageFormatEnum)
     ' A straight-forward image file format conversion method
     
