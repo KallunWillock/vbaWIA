@@ -9,6 +9,8 @@
 
 'LICENSE:  MIT                                                                                                        
 
+Main
+
 Sub Main()
     Const wiaFormatBMP = "{B96B3CAB-0728-11D3-9D7B-0000F81EF32E}"
     Const wiaFormatPNG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}"
