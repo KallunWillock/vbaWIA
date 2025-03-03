@@ -118,7 +118,7 @@ End Sub
 Public Function GetPixelColor(ByRef ImgFile As Object, BYval x As Long, Byval y as Long)
     Dim ImgVector as Object, Location as Long, TargEtColor as Long
     Set ImgVector = ImgFile.ARGBData
-    Location = x + (y * ImgFile.Width)
+    Location = x + (y * ImgFile.Width) + x
     TargEtColor = ImgVector(Location)
     GetPixelColor = RGBFromABGR(TargEtColor)
     Set ImgVector = Nothing
