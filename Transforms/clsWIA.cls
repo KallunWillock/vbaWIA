@@ -263,6 +263,3 @@ Private Sub Class_Terminate()
   Set This.ImageFile = Nothing
 
 End Sub
-
-
-
